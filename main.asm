@@ -74,19 +74,19 @@ main:
 	add $s3, $zero, $v0
 
 	addi $t0, $zero, 1					# thao tac 1
-	beq $s2, $t0, main_tt1
+	beq $s3, $t0, main_tt1
 	addi $t0, $zero, 2					# thao tac 2
-	beq $s2, $t0, main_tt2
+	beq $s3, $t0, main_tt2
 	addi $t0, $zero, 3					# thao tac 3
-	beq $s2, $t0, main_tt3
+	beq $s3, $t0, main_tt3
 	addi $t0, $zero, 4 					# thao tac 4
-	beq $s2, $t0, main_tt4
+	beq $s3, $t0, main_tt4
 	addi $t0, $zero, 5 					# thao tac 5
-	beq $s2, $t0, main_tt5
+	beq $s3, $t0, main_tt5
 	addi $t0, $zero, 6 					# thao tac 6
-	beq $s2, $t0, main_tt6
+	beq $s3, $t0, main_tt6
 	addi $t0, $zero, 7 					# thao tac 7
-	beq $s2, $t0, main_tt7
+	beq $s3, $t0, main_tt7
 
 
 
