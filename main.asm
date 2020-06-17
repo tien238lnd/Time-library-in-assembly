@@ -11,32 +11,32 @@
 	str_MONTH_NAME: .ascii "January   February  March     April     May       June      July      August    September October   November  December "
 
 	str_menu:	
-		.asciiz "\n--- MENU ---\n"
+		.asciiz "\n\n--- MENU ---\n"
 	str_option0:
-		.asciiz "\n0. Nhap lai ngay thang nam khac\n"
+		.asciiz "0. Nhap lai ngay thang nam khac\n"
 	str_option1:
-		.asciiz "\n1. Xuat theo dinh dang DD/MM/YYYY\n"
+		.asciiz "1. Xuat theo dinh dang DD/MM/YYYY\n"
 	str_option2:
-		.asciiz "\n2. Chuyen doi thanh cac dinh dang khac\n"
+		.asciiz "2. Chuyen doi thanh cac dinh dang khac\n"
 	str_option2_ask_type:
-		.asciiz "Chon kieu convert (A- MM/DD/YYYY | B- Month DD, YYYY | C- DD Month, YYYY): \n"
+		.asciiz "Chon kieu convert (A- MM/DD/YYYY | B- Month DD, YYYY | C- DD Month, YYYY): "
 	str_option3:
-		.asciiz "\n3. Cho biet ngay vua nhap la thu may trong tuan\n"
+		.asciiz "3. Cho biet ngay vua nhap la thu may trong tuan\n"
 	str_option4:
-		.asciiz "\n4. Kiem tra nam nhuan\n"
+		.asciiz "4. Kiem tra nam nhuan\n"
 	str_option5:
-		.asciiz "\n5. Cho biet khoang thoi gian giua chuoi TIME_1 va TIME_2\n"
+		.asciiz "5. Cho biet khoang thoi gian giua chuoi TIME_1 va TIME_2\n"
 	str_option6:
-		.asciiz "\n6. Cho biet 2 nam nhuan gan nhat voi nam vua nhap\n"
+		.asciiz "6. Cho biet 2 nam nhuan gan nhat voi nam vua nhap\n"
 	str_option7:
-		.asciiz "\n7. Thoat\n"
+		.asciiz "7. Thoat\n"
 	str_ask_option:
 		.asciiz "Chon mot chuc nang: "
 	
 	str_leap: .asciiz "Dung la nam nhuan!"
 	str_not_leap: .asciiz "Khong phai nam nhuan."
 	str_ask_TIME2: .asciiz "Nhap ngay thang nam cho TIME2: "
-	str_get_time: .asciiz "Khoang cach giua TIME1 va TIME2 la: "
+	str_get_time: .asciiz "\nKhoang cach giua TIME1 va TIME2 la: "
 	str_2_closest_1: .asciiz "Hai nam nhuan gan nhat la "
 	str_2_closest_2: .asciiz " va "
 	
@@ -180,7 +180,7 @@ main_OPTION3:
 	la $a0, TIME
 	jal WeekDay
 	add $a0, $v0, $0
-	addi $v0, $0, 4
+	addi $v0, $0, 1		# dung ra phai la 4, tam thoi sua lai la 0 de check xem
 	syscall
 	j MENU_LOOP
 	
@@ -883,64 +883,7 @@ GetTime:
 # $v0 la nam thu nhat
 # $v1 la nam thu hai
 Find2LeapYearClosest:
-	# trong luc tinh toan thi t1 chua nam dau, t2 chua nam thu hai, t3 chua so du, t4 chua cac bien tam
-	addi $sp, $sp, -4		# save  ra
-	sw $ra, 0($sp)
-	jal GetYear
-	add $t0 , $v0, $0		# t0 chua nam cua TIME
-
-	addi $t4, $0, 4			# lay t0 % 4 va lay t3 chua so du
-	div $t0, $t4	
-	mfhi $t3
-
-	bne $t3, 0, Find2Leap_khongnhuan
-	subi $t1, $t0, 4
-	j Find2Leap_nhuan
-	Find2Leap_khongnhuan:
-	sub $t1, $t0, $t3		# t1 (nam dau tien) = nam - t3
-	
-	Find2Leap_nhuan:	
-	subi $t4, 4, $t3  		# t2 (nam thu hai) = nam + (4- t3)
-	add $t1, $t0, $t4 
-
-	add $a0, $t1, $0
-	jal CheckLeapYear		# neu t1 khong nhuan thi t1 = t1 -4
-	beq $v0, 1, Find2Leap_Second
-	sub $t1, $t1, 4  
-
-	Find2Leap_Second:
-	add $a0, $t2, $0
-	jal CheckLeapYear		# neu t2 khong nhuan thi t2 = t2 + 4
-	beq $v0, 1, Find2Leap_Continue
-	add $t2, $t2, 4  
-
-	# t4 = t0 - t1
-	# t5 = t2 + 4 - t0
-	# t6 chua gia tri ket qua
-	sub $t4, $t0, $t1
-	addi $t5, $t2, 4
-	sub $t5, $t5, $t0
-	slt $t5, $t4, $t6		# neu nhu t5 < t4 thi t1 = t2, t2 = t1 + 4
-	beq $t6 , 0 ,  Find2Leap_Next1
-	add $t1, $t0, $t2
-	addi $t2, $t1, 4
-
-	Find2Leap_Next1:
-	# t5 = t2 + 4 - t0
-	# t4 = t0 - t1 + 4 
-	# t6 chua gia tri ket qua
-	addi $t4, $t4, 4
-	slt $t4, $t5, $t6		# neu nhu t4 < t5 thi  t2 = t1 - 4
-	beq $t6 , 0 ,  Find2Leap_Next2
-	subi $t2, $t1, 4
-
-	add $v0, $t1, $0
-	add $v1, $t2, $0
-
-	lw $ra, 0($sp)			# pop tro ve ra
-	addi $sp, $sp, 4
-	jr $ra
-
+	### HAM CUA HIEU ###
 
 # Ham tra ve ngay trong DD/MM/YYYY
 # a0 la chuoi TIME
