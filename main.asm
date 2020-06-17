@@ -337,8 +337,65 @@ _stoi:
 	stoi.EXIT:
 	jr $ra
 	
+# Ham tim xem 2 nam nhuan gan nhat trong nam 
+# $a0 la TIME
+# $v0 la nam thu nhat
+# $v1 la nam thu hai
+Find2LeapYearClosest:
+	# trong luc tinh toan thi t1 chua nam dau, t2 chua nam thu hai, t3 chua so du, t4 chua cac bien tam
+	addi $sp, $sp, -4		# save  ra
+	sw $ra, 0($sp)
+	jal GetYear
+	add $t0 , $v0, $0		# t0 chua nam cua TIME
+
+	addi $t4, $0, 4			# lay t0 % 4 va lay t3 chua so du
+	div $t0, $t4	
+	mfhi $t3
+
+	sub $t1, $t0, $t3		# t1 (nam dau tien) = nam - t3
+
+	subi $t4, 4, $t3  		# t2 (nam thu hai) = nam + (4- t3)
+	add $t1, $t0, $t4 
+
+	add $a0, $t1, $0
+	jal CheckLeapYear		# neu t1 khong nhuan thi t1 = t1 -4
+	beq $v0, 1, Find2Leap_Second
+	sub $t1, $t1, 4  
+
+	Find2Leap_Second:
+	add $a0, $t2, $0
+	jal CheckLeapYear		# neu t2 khong nhuan thi t2 = t2 + 4
+	beq $v0, 1, Find2Leap_Continue
+	add $t2, $t2, 4  
+
+	# t4 = t0 - t1
+	# t5 = t2 + 4 - t0
+	# t6 chua gia tri ket qua
+	sub $t4, $t0, $t1
+	addi $t5, $t2, 4
+	sub $t5, $t5, $t0
+	slt $t5, $t4, $t6		# neu nhu t5 < t4 thi t1 = t2, t2 = t1 + 4
+	beq $t6 , 0 ,  Find2Leap_Next1
+	add $t1, $t0, $t2
+	addi $t2, $t1, 4
+
+	Find2Leap_Next1:
+	# t5 = t2 + 4 - t0
+	# t4 = t0 - t1 + 4 
+	# t6 chua gia tri ket qua
+	addi $t4, $t4, 4
+	slt $t4, $t5, $t6		# neu nhu t4 < t5 thi  t2 = t1 - 4
+	beq $t6 , 0 ,  Find2Leap_Next2
+	subi $t2, $t1, 4
+
+	add $v0, $t1, $0
+	add $v1, $t2, $0
+
+	lw $ra, 0($sp)			# pop tro ve ra
+	addi $sp, $sp, 4
+	jr $ra
 
 
 
-	
+
 	
