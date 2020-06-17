@@ -410,5 +410,19 @@ CheckLeapYear_byTIME:
 	addi $sp, $sp, 4
 	jr $ra	
 
-
+#void CopyStr(char* src, char*dst, int len)
+CopyStr:
+	add $t0, $0, $0
+	CopyStr_LOOP:
+	slt $t1, $t0, $a2
+	beq $t1, $0, CopyStr_END
+	add $t1, $t0, $a0
+	lb $t2, 0($t1)
+	add $t1, $t0, $a1
+	sb $t2, 0($t1)
+	addi $t0, $t0, 1
+	j CopyStr_LOOP
+	CopyStr_END:
+	jr $ra
+	
 	
