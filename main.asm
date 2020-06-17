@@ -395,7 +395,20 @@ Find2LeapYearClosest:
 	addi $sp, $sp, 4
 	jr $ra
 
+# Ham kiem tra nam nhuan voi input la time
+# tra ve 1 - nam nhuan, 0 - khong la nam nhuan
+CheckLeapYear_byTIME:
+	
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
 
+	jal GetYear
+	add $a0, $zero, $v0
+	jal CheckLeapYear
+
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra	
 
 
 	
