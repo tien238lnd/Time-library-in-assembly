@@ -9,7 +9,8 @@
 	TIME: .asciiz "DD/MM/YYYYsparespare"
 	TIME2: .asciiz "DD/MM/YYYYsparespare"
 	str_MONTH_NAME: .ascii "January   February  March     April     May       June      July      August    September October   November  December "
-
+	str_WEEKDAY_NAME: .asciiz "Sun","  Mon","  Tues"," Wed","  Thurs","Fri","  Sat"
+	
 	str_menu:	
 		.asciiz "\n\n--- MENU ---\n"
 	str_option0:
@@ -560,6 +561,8 @@ Convert:
 	jr $ra
 
 # function for option 3:
+#char* WeekDay(char* TIME)
+#return the day of the week (Sun, Mon, Tues, Wed, Thurs, Fri, Sat)
 WeekDay:
 	addi $sp, $sp, -20
 	sw $ra, 0($sp)
@@ -676,7 +679,14 @@ WeekDay:
 	
 	addi $s2, $0, 7
 	div $s1, $s2
-	mfhi $v0
+	mfhi $v0		#number of result 0->6
+	
+	add $t0, $0, 6
+	mult $v0, $t0
+	mflo $v0		#start byte of name in weekdayname
+	
+	la $t0, str_WEEKDAY_NAME
+	add $v0, $v0, $t0
 	
 	lw $ra, 0($sp)
 	lw $s0, 4($sp)
@@ -694,8 +704,18 @@ CheckGregorianDate:
 	
 	jal Year
 	addi $t0, $0, 1752
-	slt $t0, $v0, $t0
-	bne $t0, $0, CheckGregorianDate_RETURN_0
+	slt $t1, $v0, $t0
+	bne $t1, $0, CheckGregorianDate_RETURN_0
+	slt $t1, $t0, $v0
+	bne $t1, $0, CheckGregorianDate_RETURN_1
+	
+	lw $a0, 4($sp)
+	jal Month
+	addi $t0, $0, 9
+	slt $t1, $v0, $t0
+	bne $t1, $0, CheckGregorianDate_RETURN_0
+	slt $t1, $t0, $v0
+	bne $t1, $0, CheckGregorianDate_RETURN_1
 	
 	lw $a0, 4($sp)
 	jal Day
@@ -714,7 +734,7 @@ CheckGregorianDate:
 	lw $ra, 0($sp)
 	addi, $sp, $sp, 8
 	jr $ra
-	
+
 # function for option 4:
 # Ham kiem tra nam nhuan voi input la time
 # tra ve 1 - nam nhuan, 0 - khong la nam nhuan
