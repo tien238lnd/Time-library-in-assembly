@@ -903,7 +903,85 @@ GetTime:
 # $v0 la nam thu nhat
 # $v1 la nam thu hai
 Find2LeapYearClosest:
-	### HAM CUA HIEU ###
+	# trong luc tinh toan thi t1 chua nam dau, t2 chua nam thu hai, t3 chua so du, t4 chua cac bien tam
+	
+	addi $t7, $0, 1
+	addi $sp, $sp, -16		# save  ra
+	sw $ra, 0($sp)
+	jal Year
+	add $t0 , $v0, $0		# t0 chua nam cua TIME
+	addi $t4, $0, 4			# lay t0 % 4 va lay t3 chua so du
+	div $t0, $t4	
+	mfhi $t3
+
+	bne $t3, 0, Find2Leap_khongnhuan
+	subi $t1, $t0, 4
+	j Find2Leap_nhuan
+	Find2Leap_khongnhuan:
+	sub $t1, $t0, $t3		# t1 (nam dau tien) = nam - t3
+	
+	Find2Leap_nhuan:	
+	addi $t2, $t0, 4  		# t2 (nam thu hai) = nam + (4- t3)
+	sub $t2, $t2, $t3 
+
+	add $a0, $t1, $0
+	# Luu lai t0 t1 t2
+	sw $t0, 4($sp)     		# Luu $t0
+    sw $t1, 8($sp)     		# Luu $t1
+	sw $t2, 12($sp)			# Luu $t2
+	jal CheckLeapYear		# neu t1 khong nhuan thi t1 = t1 -4, check dieu kien gan nhat -> return
+	# hoi phuc lai t0, t1 t2
+	lw $t2, 12($sp)	   		# hp $t2
+	lw $t1, 8($sp)     		# Hp $t1
+	lw $t0, 4($sp)     		# HP $t0
+	beq $v0, 1, Find2Leap_Second	# neu nhuan thi kiem tra cai tiep theo
+	subi $t1, $t1, 4
+	
+	# check dieu kien gan nhat
+	# t4 = t0 - t1
+	# t5 = t2 + 4 - t0
+	# t6 chua gia tri ket qua
+	sub $t4, $t0, $t1
+	addi $t5, $t2, 4
+	sub $t5, $t5, $t0
+	slt $t6, $t5, $t4		# neu nhu t5 < t4 thi t1 = t2, t2 = t1 + 4, neu khong thi return
+	beq $t6, 0 ,  Return
+	add $t1, $0, $t2
+	addi $t2, $t1, 4
+	j Return
+
+	Find2Leap_Second:
+	add $a0, $t2, $0
+	# Luu lai t0 t1 t2
+	sw $t0, 4($sp)     		# Luu $t0
+    sw $t1, 8($sp)     		# Luu $t1
+	sw $t2, 12($sp)			# Luu $t2
+	jal CheckLeapYear		# neu t2 khong nhuan thi t2 = t2 + 4, check dieu kien, neu nhuan thi return 
+	# hoi phuc lai t0, t1 t2
+	lw $t2, 12($sp)	   		# hp $t2
+	lw $t1, 8($sp)     		# Hp $t1
+	lw $t0, 4($sp)     		# HP $t0
+	beq $v0, 1, Return
+	addi $t2, $t2, 4 
+	
+	# t5 = t2 + 4 - t0
+	# t4 = t0 - t1 + 4 
+	# t6 chua gia tri ket qua
+	sub $t4, $t0, $t1
+	addi $t4, $t4, 4
+	addi $t5, $t2, 4
+	sub $t5, $t5, $t0
+	slt $t6, $t4, $t5 		# neu nhu t4 < t5 thi  t2 = t1 - 4, khong thi return 
+	beq $t6 , 0 ,  Return
+	subi $t2, $t1, 4
+
+	Return:
+	add $v0, $t1, $0
+	add $v1, $t2, $0
+
+	lw $ra, 0($sp)			# pop tro ve ra
+	addi $sp, $sp, 16
+	jr $ra
 
 # Ham tra ve ngay trong DD/MM/YYYY
 # a0 la chuoi TIME
