@@ -150,7 +150,7 @@ int main()
 		input(day2, month2, year2);
 		char TIME2[20];
 		Date(day2, month2, year2, TIME2);
-		cout << "Khoang cach giua TIME1 va TIME2 la: " << GetTime(TIME1, TIME2) << endl;
+		cout << "Khoang cach giua TIME1 va TIME2 la: " << GetTime(TIME, TIME2) << endl;
 		break;
 	case 6:
 		int prev, next;

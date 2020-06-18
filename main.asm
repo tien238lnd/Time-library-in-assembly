@@ -1,7 +1,7 @@
 .data 
 	str_ask_day: .asciiz "\nNhap ngay DAY: "
 	str_ask_month: .asciiz "\nNhap thang MONTH: "
-	str_ask_year: .asciiz "\nNhap nam YEAR: "
+	str_ask_year: .asciiz "\nNhap nam YEAR [0-2399): "
 	str_invalid: .asciiz "\nKhong hop le, nhap lai: "
 	
 	TIME: .asciiz "DD/MM/YYYYsparespare"
@@ -251,16 +251,22 @@ main_OPTION6:
 # Ket qua duoc luu vao a0:NGAY, a1:THANG, a2:NAM
 # void Input(int* day, int* month, int* year)
 Input:
-	add $sp, $sp, -4   					# Luu $ra vao stack					
+	add $sp, $sp, -24   # Luu $ra vao stack					
 	sw $ra, 0($sp)
-	# $t7 ~&sday,
+	sw $a0, 4($sp)
+	sw $a1, 8($sp)
+	sw $a2, 12($sp)
+	addi $t7, $sp, 16	# char sday[2]
+	addi $t8, $sp, 18	# char smonth[2]
+	addi $t9, $sp, 20	# char syear[4]
+
 	# => $t4 ~ day, $t5 ~ month, $t6 ~ year
 	# Nhap chuoi NGAY
 	addi $v0, $0, 4  					# cout << str_ask_day
 	la $a0, str_ask_day
 	syscall
-	addi $v0, $0, 8						# cin >> str_day
-	la $a0, str_day
+	addi $v0, $0, 8						# cin >> sday
+	add $a0, $t7, $0
 	la $a1, 3
 	syscall	
 	addi $a1, $a1, -1 					# day=stoi(sday, length)
@@ -280,8 +286,8 @@ Input:
 	addi $v0, $0, 4 				# cout << str_invalid
 	la $a0, str_invalid
 	syscall
-	addi $v0, $0, 8					# cin >> str_day
-	la $a0, str_day
+	addi $v0, $0, 8					# cin >> sday
+	add $a0, $t7, $0
 	la $a1, 3
 	syscall
 	addi $a1, $a1, -1				# day=stoi(sday, length)
@@ -295,8 +301,8 @@ Input:
 	addi $v0, $0, 4 				# cout << str_ask_month
 	la $a0, str_ask_month
 	syscall
-	addi $v0, $0, 8					# cin >> str_month
-	la $a0, str_month
+	addi $v0, $0, 8					# cin >> smonth
+	add $a0, $t8, $0
 	la $a1, 3
 	syscall
 	addi $a1, $a1, -1				# month=stoi(smonth, length)
@@ -313,8 +319,8 @@ Input:
 	addi $v0, $0, 4				# cout << str_invalid
 	la $a0, str_invalid
 	syscall
-	addi $v0, $0, 8				# cin >> str_month
-	la $a0, str_month
+	addi $v0, $0, 8					# cin >> smonth
+	add $a0, $t8, $0
 	la $a1, 3
 	syscall
 	addi $a1, $a1, -1			# month=stoi(smonth, length)
@@ -328,8 +334,8 @@ Input:
 	addi $v0, $0, 4						# cout << str_ask_year
 	la $a0, str_ask_year
 	syscall
-	addi $v0, $0, 8						# cin >> str_year
-	la $a0, str_year
+	addi $v0, $0, 8						# cin >> syear
+	add $a0, $t9, $0
 	la $a1, 5
 	syscall
 	addi $a1, $a1, -1					# year=stoi(syear, length)
@@ -337,16 +343,16 @@ Input:
 	add $t6, $v0, $0
 	# kiem tra NAM co hop le, neu khong hop le thi nhap lai
 	Input_CHECK_YEAR_AGAIN_LOOP:	 
-	slti $t0, $t6, 1900				# if year < 1900 t0=1
-	addi $t3, $0, 2100				# if 2100 < day t1=1
+	slti $t0, $t6, 0				# if year < 0 t0=1
+	addi $t3, $0, 2399				# if 2399 < day t1=1
 	slt $t1, $t3, $t6	
 	add $t2, $t0, $t1				# t2=t0+t1
 	beq $t2, 0, Input_CHECK_YEAR_AGAIN_EXIT				# if t2=0 goto EXIT
 	addi $v0, $0, 4					# cout << str_invalid
 	la $a0, str_invalid
 	syscall
-	addi $v0, $0, 8					# cin >> str_year
-	la $a0, str_year
+	addi $v0, $0, 8						# cin >> syear
+	add $a0, $t9, $0
 	la $a1, 5
 	syscall
 	addi $a1, $a1, -1				# year=stoi(syear, length)
@@ -393,11 +399,14 @@ Input:
 	j Input
 
 	Input_CHECK_VALID_END:
-	add $a0, $t4, $0
-	add $a1, $t5, $0
-	add $a2, $t6, $0
+	lw $a0, 4($sp)
+	lw $a1, 8($sp)
+	lw $a2, 12($sp)
+	sw $t4, 0($a0)
+	sw $t5, 0($a1)
+	sw $t6, 0($a2)
 	lw $ra, 0($sp)
-	add $sp, $sp, 4
+	add $sp, $sp, 24
 	jr $ra
 	
 # function for option 1
@@ -794,8 +803,7 @@ stoi:
 	
 	stoi_LOOP:
 	beq $t0, $a1, stoi_EXIT
-	
-	#lb $t1, $t0($a0)	# str[i]
+
 	lb $t1, 0($t0)	# str[i]
 	beq $t1, '\n', stoi_EXIT
 	
