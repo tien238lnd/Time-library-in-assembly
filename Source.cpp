@@ -100,7 +100,7 @@ int main()
 {
 	MAIN_LOOP:
 	int day, month, year;
-	input(&day, &month, &year);
+	input(day, month, year);
 	char TIME[20];
 	Date(day, month, year, TIME);
 	MENU_LOOP:
@@ -127,7 +127,7 @@ int main()
 		CHOOSE_TYPE: int type; cin >> type;
 		switch (type)
 		{
-		case 'A': case 'B': case 'C:
+		case 'A': case 'B': case 'C':
 			cout << Convert(TIME, type) << endl;
 			break;
 		default:
@@ -147,7 +147,7 @@ int main()
 	case 5:
 		cout << "Nhap ngay thang nam cho TIME2: " << endl;
 		int day2, month2, year2;
-		input(&day2, &month2, &year2);
+		input(day2, month2, year2);
 		char TIME2[20];
 		Date(day2, month2, year2, TIME2);
 		cout << "Khoang cach giua TIME1 va TIME2 la: " << GetTime(TIME1, TIME2) << endl;
@@ -163,5 +163,5 @@ int main()
 			goto CHOOSE_FEATURE;
 	}
 	goto MENU_LOOP;
-	MAIN_EXIT;
+	MAIN_EXIT:
 }

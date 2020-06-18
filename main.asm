@@ -3,9 +3,7 @@
 	str_ask_month: .asciiz "\nNhap thang MONTH: "
 	str_ask_year: .asciiz "\nNhap nam YEAR: "
 	str_invalid: .asciiz "\nKhong hop le, nhap lai: "
-	str_day: .space 2
-	str_month: .space 2
-	str_year: .space 4
+	
 	TIME: .asciiz "DD/MM/YYYYsparespare"
 	TIME2: .asciiz "DD/MM/YYYYsparespare"
 	str_MONTH_NAME: .ascii "January   February  March     April     May       June      July      August    September October   November  December "
@@ -47,14 +45,21 @@
 # Chuong trinh chinh
 main:
 	main_LOOP:
-	# Nhap NGAY THANG NAM , s0: NGAY, s1: THANG, s2: NAM
+	# Nhap NGAY THANG NAM
+	addi $sp, $sp, -12
+	addi $a0, $sp, 0	# &day
+	addi $a1, $sp, 4	# &month
+	addi $a2, $sp, 8	# &year
+	# Input(&day, &month, &year)
 	jal Input
-	add $s0, $a0, $0
-	add $s1, $a1, $0
-	add $s2, $a2, $0
+	# chuyen gia tri day, hien dang nam o vung nho co dia chi $a0, vao trong thanh ghi $0 luon
+	lw $a0, 0($sp)
+	lw $a1, 4($sp)
+	lw $a2, 8($sp)
+	addi $sp, $sp, 12
 	la $a3, TIME
 	jal Date
-	
+
 	MENU_LOOP:
 	# In ra toan bo cac thao tac
 	la $a0, str_menu
@@ -244,11 +249,12 @@ main_OPTION6:
 	
 # Nhap NGAY THANG NAM, kiem tra tinh hop le, neu sai thi nhap lai
 # Ket qua duoc luu vao a0:NGAY, a1:THANG, a2:NAM
+# void Input(int* day, int* month, int* year)
 Input:
 	add $sp, $sp, -4   					# Luu $ra vao stack					
 	sw $ra, 0($sp)
-	
-	# => $t5 ~ day, $t6 ~ month, $t7 ~ year
+	# $t7 ~&sday,
+	# => $t4 ~ day, $t5 ~ month, $t6 ~ year
 	# Nhap chuoi NGAY
 	addi $v0, $0, 4  					# cout << str_ask_day
 	la $a0, str_ask_day
@@ -258,15 +264,15 @@ Input:
 	la $a1, 3
 	syscall	
 	addi $a1, $a1, -1 					# day=stoi(sday, length)
-	jal _stoi
-	add $t5, $v0, $0
+	jal stoi
+	add $t4, $v0, $0
 	
 	# kiem tra xem NGAY co hop le ? , neu khong hop le thi nhap lai
 	Input_CHECK_DAY_AGAIN_LOOP:
 	#if day >=1 t0=1 ~ if day < 1 t0=0 ||| if day < 1 t0=1 
-	slti $t0, $t5, 1
+	slti $t0, $t4, 1
 	addi $t3, $0, 31				#if day <=31 t1=1 ||| if 31 < day t1=1
-	slt $t1, $t3, $t5
+	slt $t1, $t3, $t4
 	add $t2, $t0, $t1				#t2=t0+t1
 	beq $t2, 0, Input_CHECK_DAY_AGAIN_EXIT	#if t2=2 goto EXIT ||| if t2=0 goto EXIT
 		
@@ -279,8 +285,8 @@ Input:
 	la $a1, 3
 	syscall
 	addi $a1, $a1, -1				# day=stoi(sday, length)
-	jal _stoi
-	add $t5, $v0, $0
+	jal stoi
+	add $t4, $v0, $0
 	j Input_CHECK_DAY_AGAIN_LOOP
 	Input_CHECK_DAY_AGAIN_EXIT:
 	
@@ -294,14 +300,14 @@ Input:
 	la $a1, 3
 	syscall
 	addi $a1, $a1, -1				# month=stoi(smonth, length)
-	jal _stoi
-	add $t6, $v0, $0
+	jal stoi
+	add $t5, $v0, $0
 	
 	# kiem tra xem THANG co hop le, neu khong hop le thi nhap lai
 	Input_CHECK_MONTH_AGAIN_LOOP:
-	slti $t0, $t6, 1			# if month < 1 t0=1
+	slti $t0, $t5, 1			# if month < 1 t0=1
 	addi $t3, $0, 12			# if 12 < day t1=1
-	slt $t1, $t3, $t6
+	slt $t1, $t3, $t5
 	add $t2, $t0, $t1			# t2=t0+t1
 	beq $t2, 0, Input_CHECK_MONTH_AGAIN_EXIT 		# if t2=0 goto EXIT
 	addi $v0, $0, 4				# cout << str_invalid
@@ -312,8 +318,8 @@ Input:
 	la $a1, 3
 	syscall
 	addi $a1, $a1, -1			# month=stoi(smonth, length)
-	jal _stoi
-	add $t6, $v0, $0
+	jal stoi
+	add $t5, $v0, $0
 	j Input_CHECK_MONTH_AGAIN_LOOP
 	Input_CHECK_MONTH_AGAIN_EXIT:
 	
@@ -327,13 +333,13 @@ Input:
 	la $a1, 5
 	syscall
 	addi $a1, $a1, -1					# year=stoi(syear, length)
-	jal _stoi
-	add $t7, $v0, $0
+	jal stoi
+	add $t6, $v0, $0
 	# kiem tra NAM co hop le, neu khong hop le thi nhap lai
 	Input_CHECK_YEAR_AGAIN_LOOP:	 
-	slti $t0, $t7, 1900				# if year < 1900 t0=1
+	slti $t0, $t6, 1900				# if year < 1900 t0=1
 	addi $t3, $0, 2100				# if 2100 < day t1=1
-	slt $t1, $t3, $t7	
+	slt $t1, $t3, $t6	
 	add $t2, $t0, $t1				# t2=t0+t1
 	beq $t2, 0, Input_CHECK_YEAR_AGAIN_EXIT				# if t2=0 goto EXIT
 	addi $v0, $0, 4					# cout << str_invalid
@@ -344,39 +350,39 @@ Input:
 	la $a1, 5
 	syscall
 	addi $a1, $a1, -1				# year=stoi(syear, length)
-	jal _stoi
-	add $t7, $v0, $0
+	jal stoi
+	add $t6, $v0, $0
 	j Input_CHECK_YEAR_AGAIN_LOOP
 	Input_CHECK_YEAR_AGAIN_EXIT:
 	
 	Input_CHECK_VALID:
-	beq $t6, 4, Input_CHECKDAY31
-	beq $t6, 6, Input_CHECKDAY31
-	beq $t6, 9, Input_CHECKDAY31
-	beq $t6, 11, Input_CHECKDAY31
+	beq $t5, 4, Input_CHECKDAY31
+	beq $t5, 6, Input_CHECKDAY31
+	beq $t5, 9, Input_CHECKDAY31
+	beq $t5, 11, Input_CHECKDAY31
 	j Input_CHECKMONTH2
 
 	Input_CHECKDAY31:
-	beq $t5, 31, Input_INPUTAGAIN
+	beq $t4, 31, Input_INPUTAGAIN
 	j Input_CHECK_VALID_END
 
 	Input_CHECKMONTH2:
-	beq $t6, 2, Input_CHECKLEAP
+	beq $t5, 2, Input_CHECKLEAP
 	j Input_CHECK_VALID_END
 
 	Input_CHECKLEAP:
-	add $a0, $t7, $0
+	add $a0, $t6, $0
 	jal CheckLeapYear
 	beq $v0, 1, Input_OK_LEAP
 	j Input_NOT_LEAP
 
 	Input_OK_LEAP:
-	slti $t0, $t5, 30
+	slti $t0, $t4, 30
 	beq $t0, 1, Input_CHECK_VALID_END
 	j Input_INPUTAGAIN
 
 	Input_NOT_LEAP:
-	slti $t0, $t5, 29
+	slti $t0, $t4, 29
 	beq $t0, 1, Input_CHECK_VALID_END
 
 	Input_INPUTAGAIN:
@@ -387,9 +393,9 @@ Input:
 	j Input
 
 	Input_CHECK_VALID_END:
-	add $a0, $t5, $0
-	add $a1, $t6, $0
-	add $a2, $t7, $0
+	add $a0, $t4, $0
+	add $a1, $t5, $0
+	add $a2, $t6, $0
 	lw $ra, 0($sp)
 	add $sp, $sp, 4
 	jr $ra
@@ -779,36 +785,36 @@ CheckLeapYear:
 	jr $ra
 	
 
-# ham chuyen doi char* thanh int, $a0 la strBuffer, $a1 la max_length	
-_stoi:	
+# int stoi(char* str, int length)
+stoi:	
 	add $v0, $0, 0
 	#add $t0, $0, 0	# bien dem vong for
 	addi $t0, $a0, 0 
 	add $a1, $a0, $a1 # a1 bay gio la dc cuoi cung cua string
 	
-	_stoi.LOOP:
-	beq $t0, $a1, _stoi.EXIT
+	stoi_LOOP:
+	beq $t0, $a1, stoi_EXIT
 	
 	#lb $t1, $t0($a0)	# str[i]
 	lb $t1, 0($t0)	# str[i]
-	beq $t1, '\n', _stoi.EXIT
+	beq $t1, '\n', stoi_EXIT
 	
 	slti $t2, $t1, '0'
-	beq $t2, 1, _stoi.ERROR
+	beq $t2, 1, stoi_ERROR
 	addi $t3, $0, '9'
 	slt $t2, $t3, $t1
-	beq $t2, 1, _stoi.ERROR
+	beq $t2, 1, stoi_ERROR
 	
 	mul $v0, $v0, 10
 	add $v0, $v0, $t1
 	sub $v0, $v0, '0'
 	addi $t0, $t0, 1
-	j _stoi.LOOP
+	j stoi_LOOP
 	
-	_stoi.ERROR:
+	stoi_ERROR:
 	addi $v0, $0, -1 
 	
-	_stoi.EXIT:
+	stoi_EXIT:
 	jr $ra
 
 # function for option 5:
