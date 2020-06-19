@@ -166,7 +166,7 @@ main_OPTION2:
 		# copy TIME ra TIME2
 		la $a0, TIME
 		la $a1, TIME2
-		addi $a2, $0, 10
+		addi $a2, $0, 11
 		jal CopyStr
 		# convert TIME
 		add $a1, $s0, $0
@@ -181,7 +181,7 @@ main_OPTION2:
 		# copy TIME2 ve TIME
 		la $a0, TIME2
 		la $a1, TIME
-		addi $a2, $0, 10
+		addi $a2, $0, 11
 		jal CopyStr
 		j MENU_LOOP
 		
