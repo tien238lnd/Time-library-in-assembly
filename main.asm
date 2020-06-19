@@ -287,14 +287,17 @@ main_OPTION6:
 # Ket qua duoc luu vao a0:NGAY, a1:THANG, a2:NAM
 # void Input(int* day, int* month, int* year)
 Input:
-	addi $sp, $sp, -24  	# Luu $ra vao stack					
+	addi $sp, $sp, -36  	# Luu $ra vao stack					
 	sw $ra, 0($sp)
 	sw $a0, 4($sp)
 	sw $a1, 8($sp)
 	sw $a2, 12($sp)
-	addi $t7, $sp, 16	# char sday[2]
-	addi $t8, $sp, 18	# char smonth[2]
-	addi $t9, $sp, 20	# char syear[4]
+	sw $s0, 16($sp)
+	sw $s1, 20($sp)
+	sw $s2, 24($sp)
+	addi $s0, $sp, 28	# char sday[2]
+	addi $s1, $sp, 30	# char smonth[2]
+	addi $s2, $sp, 32	# char syear[4]
 	
 	Input_ENTRY:
 	# => $t4 ~ day, $t5 ~ month, $t6 ~ year
@@ -303,7 +306,7 @@ Input:
 	la $a0, str_ask_day
 	syscall
 	addi $v0, $0, 8					# cin >> sday
-	add $a0, $t7, $0
+	add $a0, $s0, $0
 	addi $a1, $0, 3
 	#la $a1, 3
 	syscall	
@@ -325,7 +328,7 @@ Input:
 	la $a0, str_invalid
 	syscall
 	addi $v0, $0, 8					# cin >> sday
-	add $a0, $t7, $0
+	add $a0, $s0, $0
 	addi $a1, $0, 3
 	#la $a1, 3
 	syscall
@@ -341,7 +344,7 @@ Input:
 	la $a0, str_ask_month
 	syscall
 	addi $v0, $0, 8					# cin >> smonth
-	add $a0, $t8, $0
+	add $a0, $s1, $0
 	#la $a1, 3
 	addi $a1, $0, 3
 	syscall
@@ -360,7 +363,7 @@ Input:
 	la $a0, str_invalid
 	syscall
 	addi $v0, $0, 8					# cin >> smonth
-	add $a0, $t8, $0
+	add $a0, $s1, $0
 	#la $a1, 3
 	addi $a1, $0, 3
 	syscall
@@ -376,7 +379,7 @@ Input:
 	la $a0, str_ask_year
 	syscall
 	addi $v0, $0, 8					# cin >> syear
-	add $a0, $t9, $0
+	add $a0, $s2, $0
 	#la $a1, 5
 	addi $a1, $0, 5
 	syscall
@@ -394,7 +397,7 @@ Input:
 	la $a0, str_invalid
 	syscall
 	addi $v0, $0, 8					# cin >> syear
-	add $a0, $t9, $0
+	add $a0, $s2, $0
 	addi $a1, $0, 5
 	#la $a1, 5
 	syscall
@@ -451,11 +454,14 @@ Input:
 	lw $a0, 4($sp)
 	lw $a1, 8($sp)
 	lw $a2, 12($sp)
+	lw $s0, 16($sp)
+	lw $s1, 20($sp)
+	lw $s2, 24($sp)
 	sw $t4, 0($a0)
 	sw $t5, 0($a1)
 	sw $t6, 0($a2)
 	lw $ra, 0($sp)
-	addi $sp, $sp, 24
+	addi $sp, $sp, 36
 	jr $ra
 	
 # function for option 1
