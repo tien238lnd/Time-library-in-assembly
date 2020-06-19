@@ -144,17 +144,18 @@ main_OPTION2:
 	addi $v0, $0, 12 
 	syscall
 	add $s0, $0, $v0
-	addi $t0, $0, 'A'
+	addi $t0, $0, 65
 	beq $s0, $t0, main_OPTION2_CONVERT
-	addi $t0, $0, 'a'
+	addi $t0, $0, 66
 	beq $s0, $t0, main_OPTION2_CONVERT
-	addi $t0, $0, 'B'
+	addi $t0, $0, 67
 	beq $s0, $t0, main_OPTION2_CONVERT
-	addi $t0, $0, 'b'
+	addi $s0, $s0, -32
+	addi $t0, $0, 65
 	beq $s0, $t0, main_OPTION2_CONVERT
-	addi $t0, $0, 'C'
+	addi $t0, $0, 66
 	beq $s0, $t0, main_OPTION2_CONVERT
-	addi $t0, $0, 'c'
+	addi $t0, $0, 67
 	beq $s0, $t0, main_OPTION2_CONVERT
 	la $a0, str_invalid
 	addi $v0, $0, 4	
@@ -241,7 +242,7 @@ main_OPTION5:
 	addi $a2, $sp, 8	# &year
 	# Input(&day, &month, &year)
 	jal Input
-	# chuyen gia tri day, hien dang nam o vung nho co dia chi $a0, vao trong thanh ghi $0 luon
+	# chuyen gia tri day, hien dang nam o vung nho co dia chi $0($sp), vao trong thanh ghi $a0
 	lw $a0, 0($sp)
 	lw $a1, 4($sp)
 	lw $a2, 8($sp)
@@ -303,7 +304,8 @@ Input:
 	syscall
 	addi $v0, $0, 8					# cin >> sday
 	add $a0, $t7, $0
-	la $a1, 3
+	addi $a1, $0, 3
+	#la $a1, 3
 	syscall	
 	addi $a1, $a1, -1 				# day=stoi(sday, length)
 	jal stoi
@@ -324,7 +326,8 @@ Input:
 	syscall
 	addi $v0, $0, 8					# cin >> sday
 	add $a0, $t7, $0
-	la $a1, 3
+	addi $a1, $0, 3
+	#la $a1, 3
 	syscall
 	addi $a1, $a1, -1				# day=stoi(sday, length)
 	jal stoi
@@ -339,7 +342,8 @@ Input:
 	syscall
 	addi $v0, $0, 8					# cin >> smonth
 	add $a0, $t8, $0
-	la $a1, 3
+	#la $a1, 3
+	addi $a1, $0, 3
 	syscall
 	addi $a1, $a1, -1				# month=stoi(smonth, length)
 	jal stoi
@@ -357,7 +361,8 @@ Input:
 	syscall
 	addi $v0, $0, 8					# cin >> smonth
 	add $a0, $t8, $0
-	la $a1, 3
+	#la $a1, 3
+	addi $a1, $0, 3
 	syscall
 	addi $a1, $a1, -1				# month=stoi(smonth, length)
 	jal stoi
@@ -372,7 +377,8 @@ Input:
 	syscall
 	addi $v0, $0, 8					# cin >> syear
 	add $a0, $t9, $0
-	la $a1, 5
+	#la $a1, 5
+	addi $a1, $0, 5
 	syscall
 	addi $a1, $a1, -1				# year=stoi(syear, length)
 	jal stoi
@@ -389,7 +395,8 @@ Input:
 	syscall
 	addi $v0, $0, 8					# cin >> syear
 	add $a0, $t9, $0
-	la $a1, 5
+	addi $a1, $0, 5
+	#la $a1, 5
 	syscall
 	addi $a1, $a1, -1				# year=stoi(syear, length)
 	jal stoi
@@ -807,7 +814,7 @@ LeapYear:
 	addi $sp, $sp, 4
 	jr $ra	
 	
-# ham kiem tra nam nhuan, phuc vu input, c√¢u 4, 5 (getTime), 6 (closest)
+# ham kiem tra nam nhuan, phuc vu input, c‚u 4, 5 (getTime), 6 (closest)
 # a0 la mot nam, tra ve 0 neu nam khong nhuan, 1 neu nam nhuan
 CheckLeapYear:
 	addi $t1, $0, 400
@@ -972,8 +979,9 @@ Find2LeapYearClosest:
 	div $t0, $t4	
 	mfhi $t3
 
-	bne $t3, 0, Find2Leap_KHONGNHUAN
-	subi $t1, $t0, 4
+	add $t1, $0, $0
+	bne $t3, $t1, Find2Leap_KHONGNHUAN
+	addi $t1, $t0, -4
 	j Find2Leap_NHUAN
 	Find2Leap_KHONGNHUAN:
 	sub $t1, $t0, $t3		# t1 (nam dau tien) = nam - t3
@@ -992,8 +1000,9 @@ Find2LeapYearClosest:
 	lw $t2, 12($sp)	   		# hp $t2
 	lw $t1, 8($sp)     		# Hp $t1
 	lw $t0, 4($sp)     		# HP $t0
-	beq $v0, 1, Find2Leap_SECOND	# neu nhuan thi kiem tra cai tiep theo
-	subi $t1, $t1, 4
+	addi $t5, $0, 1
+	beq $v0, $t5, Find2Leap_SECOND	# neu nhuan thi kiem tra cai tiep theo
+	addi $t1, $t1, -4
 	
 	# check dieu kien gan nhat
 	# t4 = t0 - t1
@@ -1003,7 +1012,7 @@ Find2LeapYearClosest:
 	addi $t5, $t2, 4
 	sub $t5, $t5, $t0
 	slt $t6, $t5, $t4		# neu nhu t5 < t4 thi t1 = t2, t2 = t1 + 4, neu khong thi return
-	beq $t6, 0, Find2LeapYearClosest_END
+	beq $t6, $0, Find2LeapYearClosest_END
 	add $t1, $0, $t2
 	addi $t2, $t1, 4
 	j Find2LeapYearClosest_END
@@ -1012,14 +1021,15 @@ Find2LeapYearClosest:
 	add $a0, $t2, $0
 	# Luu lai t0 t1 t2
 	sw $t0, 4($sp)     		# Luu $t0
-    sw $t1, 8($sp)     		# Luu $t1
+   	sw $t1, 8($sp)     		# Luu $t1
 	sw $t2, 12($sp)			# Luu $t2
 	jal CheckLeapYear		# neu t2 khong nhuan thi t2 = t2 + 4, check dieu kien, neu nhuan thi return 
 	# hoi phuc lai t0, t1 t2
 	lw $t2, 12($sp)	   		# hp $t2
 	lw $t1, 8($sp)     		# Hp $t1
 	lw $t0, 4($sp)     		# HP $t0
-	beq $v0, 1, Find2LeapYearClosest_END
+	addi $t7, $0, 1
+	beq $v0, $t7, Find2LeapYearClosest_END
 	addi $t2, $t2, 4 
 	
 	# t5 = t2 + 4 - t0
@@ -1031,7 +1041,7 @@ Find2LeapYearClosest:
 	sub $t5, $t5, $t0
 	slt $t6, $t4, $t5 		# neu nhu t4 < t5 thi  t2 = t1 - 4, khong thi return 
 	beq $t6 , $0 , Find2LeapYearClosest_END
-	subi $t2, $t1, 4
+	addi $t2, $t1, -4
 
 	Find2LeapYearClosest_END:
 	add $v0, $t1, $0
