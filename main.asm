@@ -926,6 +926,31 @@ GetTime:
 	jal Day
 	add $s5, $v0, $0
 	
+	#check if date1>date2-> exchange
+	slt $t0, $s3, $s0
+	bne $t0, $0, GetTime_ExchangeDate
+	slt $t0, $s0, $s3
+	bne $t0, $0, GetTime_PassExchangeDate
+	slt $t0, $s4, $s1
+	bne $t0, $0, GetTime_ExchangeDate
+	slt $t0, $s1, $s4
+	bne $t0, $0, GetTime_PassExchangeDate
+	slt $t0, $s5, $s2
+	bne $t0, $0, GetTime_ExchangeDate
+	slt $t0, $s2, $s5
+	bne $t0, $0, GetTime_PassExchangeDate
+	GetTime_ExchangeDate:
+	add $t0, $0, $s0
+	add $s0, $0, $s3
+	add $s3, $0, $t0
+	add $t0, $0, $s1
+	add $s1, $0, $s4
+	add $s4, $0, $t0
+	add $t0, $0, $s2
+	add $s2, $0, $s5
+	add $s5, $0, $t0
+	GetTime_PassExchangeDate:
+	
 	#year diff->$s0
 	sub $s0, $s3, $s0
 
